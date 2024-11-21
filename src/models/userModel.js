@@ -29,6 +29,7 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: [true, 'Password is required.'],
+    private: true,
     match: [
       REGEX.PASSWORD,
       'Password must be at least 8 characters long and include uppercase, lowercase, number, and special characters.'
@@ -57,7 +58,7 @@ const userSchema = new Schema({
   },
   slug: {
     type: String,
-    required: true
+    required: false
   },
   otp: {
     value: {
@@ -81,14 +82,14 @@ const userSchema = new Schema({
 
 userSchema.plugin(toJSON);
 
-userSchema.static.isEmailTaken = async function (email, excludeUserId) {
+userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
   return await this.findOne({
     email,
     _id: { $ne: excludeUserId }
   });
 };
 
-userSchema.static.isPhoneNumberTaken = async function (phoneNumber, excludeUserId) {
+userSchema.statics.isPhoneNumberTaken = async function (phoneNumber, excludeUserId) {
   return await this.findOne({
     phoneNumber,
     _id: { $ne: excludeUserId }
@@ -111,7 +112,8 @@ userSchema.pre('save', async function save(next) {
     if (this.isModified('resetPasswordToken.value')) {
       this.otp.expiredAt = Date.now() + EXPIRATION_TIME.RESET_PASSWORD_TOKEN;
     }
-    if (this.isModified('fullName')) {
+    console.log(114 + this);
+    if (this.isModified('fullName') || !this.slug) {
       let slug = await generateSlug({
         Model: this.constructor,
         id: this._id.toString(),

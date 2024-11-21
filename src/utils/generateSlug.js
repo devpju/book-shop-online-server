@@ -1,7 +1,7 @@
-import slugtify from 'slugtify';
+import slugify from 'slugify';
 
 export const generateSlug = async ({ Model, value, id }) => {
-  let slug = slugtify(value, {
+  let slug = slugify(value, {
     replacement: '-',
     remove: undefined,
     lower: false,
