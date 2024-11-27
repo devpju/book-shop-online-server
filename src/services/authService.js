@@ -3,7 +3,7 @@ import { nodeMailer } from '~/config/nodemailer';
 import { User } from '~/models';
 import { ApiError } from '~/utils/ApiError';
 import { ACCOUNT_STATUS } from '~/utils/constants';
-import { generateOTP } from '~/utils/helpers';
+import { generateOTP, generateToken } from '~/utils/helpers';
 
 const register = async (userData) => {
   const { email, phoneNumber } = userData;
@@ -34,7 +34,20 @@ const login = async (userData) => {
   else if (user.status === ACCOUNT_STATUS.BANNED)
     throw new ApiError(StatusCodes.UNAUTHORIZED, 'Tài khoản đã bị cấm');
 
-  return user;
+  const accessToken = generateToken.accessToken({
+    userData: {
+      id: user._id,
+      roles: user.roles
+    }
+  });
+  const refreshToken = generateToken.refreshToken({
+    userData: {
+      id: user._id,
+      roles: user.roles
+    }
+  });
+
+  return { user, accessToken, refreshToken };
 };
 
 const sendOTP = async (email) => {
@@ -61,6 +74,7 @@ const verifyOTP = async ({ email, otp }) => {
   if (user.otp.expiredAt < Date.now())
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Mã OTP đã hết hạn');
   user.otp = null;
+  user.status = ACCOUNT_STATUS.VERIFIED;
   await user.save();
   return user;
 };

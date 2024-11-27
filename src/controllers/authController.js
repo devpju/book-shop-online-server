@@ -1,3 +1,6 @@
+import { env } from '~/config/environment';
+import { EXPIRATION_TIME } from '~/utils/constants';
+
 const { StatusCodes } = require('http-status-codes');
 const { authService } = require('~/services');
 const { sendResponse } = require('~/utils/responseApi');
@@ -22,12 +25,22 @@ const login = async (req, res, next) => {
   try {
     const userData = req.body;
 
-    const user = await authService.login(userData);
+    const { user, accessToken, refreshToken } = await authService.login(userData);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: env.NODE_ENV === 'production',
+      maxAge: EXPIRATION_TIME.REFRESH_TOKEN
+    });
     sendResponse({
       res,
       code: StatusCodes.OK,
       message: 'Đăng nhập tài khoản thành công',
-      data: user.toJSON()
+      data: {
+        ...user.toJSON(),
+        accessToken
+      }
     });
   } catch (error) {
     next(error);
