@@ -95,7 +95,15 @@ const refreshToken = async (refreshToken) => {
     throw new ApiError(StatusCodes.UNAUTHORIZED, 'Không tìm thấy refresh token');
   }
 
-  const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET_KEY);
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET_KEY);
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
+      throw new ApiError(StatusCodes.UNAUTHORIZED, 'Refresh token đã hết hạn');
+    }
+    throw error;
+  }
 
   const { id } = decoded;
 
