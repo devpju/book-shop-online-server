@@ -50,11 +50,19 @@ const login = async (userData) => {
   return { user, accessToken, refreshToken };
 };
 
+const logout = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
+  return user;
+};
+
 const sendOTP = async (email) => {
   const user = await User.findOne({ email });
   if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
-  const otp = generateOTP();
+  if (user.status === ACCOUNT_STATUS.VERIFIED)
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Tài khoản đã được xác minh');
 
+  const otp = generateOTP();
   user.otp.value = otp;
   await user.save();
 
@@ -68,6 +76,8 @@ const verifyOTP = async ({ email, otp }) => {
   const user = await User.findOne({ email });
 
   if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
+  if (user.status === ACCOUNT_STATUS.VERIFIED)
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Tài khoản đã được xác minh');
 
   if (user.otp.value !== otp) throw new ApiError(StatusCodes.BAD_REQUEST, 'Mã OTP không đúng');
 
@@ -83,5 +93,6 @@ export const authService = {
   register,
   login,
   sendOTP,
-  verifyOTP
+  verifyOTP,
+  logout
 };

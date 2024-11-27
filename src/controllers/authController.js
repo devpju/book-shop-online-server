@@ -46,6 +46,27 @@ const login = async (req, res, next) => {
     next(error);
   }
 };
+
+const logout = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await authService.logout(email);
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: env.NODE_ENV === 'production'
+    });
+    sendResponse({
+      res,
+      code: StatusCodes.OK,
+      message: 'Đăng xuất thành công',
+      data: user.toJSON()
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const sendOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -80,5 +101,6 @@ export const authController = {
   register,
   login,
   sendOTP,
-  verifyOTP
+  verifyOTP,
+  logout
 };

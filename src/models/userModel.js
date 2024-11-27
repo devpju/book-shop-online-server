@@ -41,7 +41,8 @@ const userSchema = new Schema({
       message: 'Status must be one of the following: ' + Object.values(ACCOUNT_STATUS).join(', ')
     },
     required: [true, 'Account status is required.'],
-    default: ACCOUNT_STATUS.UNVERIFIED
+    default: ACCOUNT_STATUS.UNVERIFIED,
+    private: true
   },
   roles: {
     type: [String],
@@ -108,9 +109,10 @@ userSchema.pre('save', async function save(next) {
       const salt = await bcrypt.genSalt(SALT_BCRYPT_PASSWORD);
       this.password = await bcrypt.hash(this.password, salt);
     }
-    if (this.isModified('otp.value')) {
+    if (this.isModified('otp.value') && this.otp.value) {
       this.otp.expiredAt = Date.now() + EXPIRATION_TIME.OTP;
     }
+
     if (this.isModified('resetPasswordToken.value')) {
       this.otp.expiredAt = Date.now() + EXPIRATION_TIME.RESET_PASSWORD_TOKEN;
     }
