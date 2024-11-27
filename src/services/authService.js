@@ -51,8 +51,8 @@ const login = async (userData) => {
   return { user, accessToken, refreshToken };
 };
 
-const logout = async (email) => {
-  const user = await User.findOne({ email });
+const logout = async (id) => {
+  const user = await User.findById(id);
   if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
   return user;
 };
@@ -79,7 +79,6 @@ const verifyOTP = async ({ email, otp }) => {
   if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
   if (user.status === ACCOUNT_STATUS.VERIFIED)
     throw new ApiError(StatusCodes.BAD_REQUEST, 'Tài khoản đã được xác minh');
-
   if (user.otp.value !== otp) throw new ApiError(StatusCodes.BAD_REQUEST, 'Mã OTP không đúng');
 
   if (user.otp.expiredAt < Date.now())

@@ -16,7 +16,7 @@ export const generateSlug = async ({ Model, value, id }) => {
   while (isExistingSlug) {
     const idPart = id.slice(0, 5);
     slug = `${slug}-${idPart}`;
-    isExistingSlug = await this.constructor.findOne({ slug });
+    isExistingSlug = await Model.findOne({ slug });
   }
   return slug;
 };

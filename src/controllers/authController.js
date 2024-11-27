@@ -49,8 +49,9 @@ const login = async (req, res, next) => {
 
 const logout = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    const user = await authService.logout(email);
+    const userData = req.user;
+    console.log(req.user);
+    const user = await authService.logout(userData.id);
     res.clearCookie('refreshToken', {
       httpOnly: true,
       sameSite: 'strict',

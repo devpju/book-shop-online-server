@@ -2,6 +2,7 @@ import jwt from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import { ApiError } from '~/utils/ApiError';
 import { User } from '~/models';
+import { env } from '~/config/environment';
 
 const isAuthorized = (user, allowedRoles) => allowedRoles.some((role) => user.roles.includes(role));
 
@@ -18,7 +19,7 @@ const authMiddleware =
     }
 
     try {
-      const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+      const decoded = jwt.verify(token, env.ACCESS_TOKEN_SECRET_KEY);
       const user = await User.findById(decoded.id);
 
       if (!user || !isAuthorized(user, allowedRoles)) {
