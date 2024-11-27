@@ -51,8 +51,23 @@ const sendOTP = async (email) => {
   return user;
 };
 
+const verifyOTP = async ({ email, otp }) => {
+  const user = await User.findOne({ email });
+
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
+
+  if (user.otp.value !== otp) throw new ApiError(StatusCodes.BAD_REQUEST, 'Mã OTP không đúng');
+
+  if (user.otp.expiredAt < Date.now())
+    throw new ApiError(StatusCodes.BAD_REQUEST, 'Mã OTP đã hết hạn');
+  user.otp = null;
+  await user.save();
+  return user;
+};
+
 export const authService = {
   register,
   login,
-  sendOTP
+  sendOTP,
+  verifyOTP
 };

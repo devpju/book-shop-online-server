@@ -48,8 +48,24 @@ const sendOTP = async (req, res, next) => {
   }
 };
 
+const verifyOTP = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const user = await authService.verifyOTP({ email, otp });
+    sendResponse({
+      res,
+      code: StatusCodes.OK,
+      message: 'Xác minh tài khoản thành công',
+      data: user.toJSON()
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const authController = {
   register,
   login,
-  sendOTP
+  sendOTP,
+  verifyOTP
 };
