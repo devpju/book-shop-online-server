@@ -23,7 +23,6 @@ const login = async (req, res, next) => {
     const userData = req.body;
 
     const user = await authService.login(userData);
-    console.log(user);
     sendResponse({
       res,
       code: StatusCodes.OK,
@@ -34,8 +33,23 @@ const login = async (req, res, next) => {
     next(error);
   }
 };
+const sendOTP = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    const user = await authService.sendOTP(email);
+    sendResponse({
+      res,
+      code: StatusCodes.OK,
+      message: 'Gửi OTP thành công',
+      data: user.toJSON()
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const authController = {
   register,
-  login
+  login,
+  sendOTP
 };

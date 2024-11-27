@@ -8,7 +8,7 @@ import {
 } from '~/utils/constants';
 import bcrypt from 'bcrypt';
 import { toJSON } from './plugin';
-import { generateSlug } from '~/utils/generateSlug';
+import { generateSlug } from '~/utils/helpers';
 const userSchema = new Schema({
   fullName: {
     type: String,
@@ -29,11 +29,7 @@ const userSchema = new Schema({
   password: {
     type: String,
     required: [true, 'Password is required.'],
-    private: true,
-    match: [
-      REGEX.PASSWORD,
-      'Password must be at least 8 characters long and include uppercase, lowercase, number, and special characters.'
-    ]
+    private: true
   },
   urlAvatar: {
     type: String
@@ -106,6 +102,9 @@ userSchema.methods.isPasswordMatch = async function (password) {
 userSchema.pre('save', async function save(next) {
   try {
     if (this.isModified('password')) {
+      if (!REGEX.PASSWORD.test(this.password)) {
+        throw new Error('Password must meet the complexity requirements.');
+      }
       const salt = await bcrypt.genSalt(SALT_BCRYPT_PASSWORD);
       this.password = await bcrypt.hash(this.password, salt);
     }

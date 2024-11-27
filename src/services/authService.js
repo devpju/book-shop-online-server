@@ -1,7 +1,9 @@
 import { StatusCodes } from 'http-status-codes';
+import { nodeMailer } from '~/config/nodemailer';
 import { User } from '~/models';
 import { ApiError } from '~/utils/ApiError';
 import { ACCOUNT_STATUS } from '~/utils/constants';
+import { generateOTP } from '~/utils/helpers';
 
 const register = async (userData) => {
   const { email, phoneNumber } = userData;
@@ -35,7 +37,22 @@ const login = async (userData) => {
   return user;
 };
 
+const sendOTP = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
+  const otp = generateOTP();
+
+  user.otp.value = otp;
+  await user.save();
+
+  const verifyEmail = nodeMailer.options({ email, template: 'OTP', params: { otp } });
+  await nodeMailer.transporter.sendMail(verifyEmail);
+
+  return user;
+};
+
 export const authService = {
   register,
-  login
+  login,
+  sendOTP
 };
