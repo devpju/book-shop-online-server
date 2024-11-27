@@ -77,6 +77,9 @@ const userSchema = new Schema({
     expiredAt: {
       type: Date
     }
+  },
+  deletedAt: {
+    type: Date
   }
 });
 
@@ -112,7 +115,6 @@ userSchema.pre('save', async function save(next) {
     if (this.isModified('resetPasswordToken.value')) {
       this.otp.expiredAt = Date.now() + EXPIRATION_TIME.RESET_PASSWORD_TOKEN;
     }
-    console.log(114 + this);
     if (this.isModified('fullName') || !this.slug) {
       let slug = await generateSlug({
         Model: this.constructor,

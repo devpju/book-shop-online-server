@@ -18,6 +18,24 @@ const register = async (req, res, next) => {
   }
 };
 
+const login = async (req, res, next) => {
+  try {
+    const userData = req.body;
+
+    const user = await authService.login(userData);
+    console.log(user);
+    sendResponse({
+      res,
+      code: StatusCodes.OK,
+      message: 'Đăng nhập tài khoản thành công',
+      data: user.toJSON()
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const authController = {
-  register
+  register,
+  login
 };

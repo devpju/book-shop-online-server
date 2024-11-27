@@ -1,5 +1,5 @@
 {
-  "name": "booktopia-server",
+  "name": "bookstore-server",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -26,6 +26,7 @@
   "dependencies": {
     "@babel/runtime": "^7.26.0",
     "async-exit-hook": "^2.0.1",
+    "axios": "^1.7.8",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -36,6 +37,7 @@
     "mongoose": "^8.8.2",
     "nodemailer": "^6.9.16",
     "slugify": "^1.6.6",
+    "uuid": "^11.0.3",
     "zod": "^3.23.8"
   }
 }

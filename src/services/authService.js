@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import { User } from '~/models';
 import { ApiError } from '~/utils/ApiError';
+import { ACCOUNT_STATUS } from '~/utils/constants';
 
 const register = async (userData) => {
   const { email, phoneNumber } = userData;
@@ -14,6 +15,27 @@ const register = async (userData) => {
   return await User.create(userData);
 };
 
+const login = async (userData) => {
+  const { emailOrPhoneNumber, password } = userData;
+
+  const user = await User.findOne({
+    $or: [{ email: emailOrPhoneNumber }, { phoneNumber: emailOrPhoneNumber }]
+  });
+
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
+
+  const isPasswordMatch = await user.isPasswordMatch(password);
+  if (!isPasswordMatch) throw new ApiError(StatusCodes.UNAUTHORIZED, 'Mật khẩu không đúng');
+
+  if (user.status === ACCOUNT_STATUS.UNVERIFIED)
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Tài khoản chưa được xác minh');
+  else if (user.status === ACCOUNT_STATUS.BANNED)
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Tài khoản đã bị cấm');
+
+  return user;
+};
+
 export const authService = {
-  register
+  register,
+  login
 };
