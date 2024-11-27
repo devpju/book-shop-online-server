@@ -97,10 +97,27 @@ const verifyOTP = async (req, res, next) => {
   }
 };
 
+const refreshToken = async (req, res, next) => {
+  try {
+    const { refreshToken } = req.cookies;
+
+    const accessToken = await authService.refreshToken(refreshToken);
+    sendResponse({
+      res,
+      code: StatusCodes.OK,
+      message: 'Làm mới token thành công',
+      data: { accessToken }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const authController = {
   register,
   login,
   sendOTP,
   verifyOTP,
-  logout
+  logout,
+  refreshToken
 };

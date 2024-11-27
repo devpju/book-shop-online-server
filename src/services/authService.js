@@ -4,7 +4,8 @@ import { User } from '~/models';
 import { ApiError } from '~/utils/ApiError';
 import { ACCOUNT_STATUS } from '~/utils/constants';
 import { generateOTP, generateToken } from '~/utils/helpers';
-
+import jwt from 'jsonwebtoken';
+import { env } from '~/config/environment';
 const register = async (userData) => {
   const { email, phoneNumber } = userData;
   const isEmailTaken = await User.isEmailTaken(email);
@@ -89,10 +90,31 @@ const verifyOTP = async ({ email, otp }) => {
   return user;
 };
 
+const refreshToken = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new ApiError(StatusCodes.UNAUTHORIZED, 'Không tìm thấy refresh token');
+  }
+
+  const decoded = jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET_KEY);
+
+  const { id } = decoded;
+
+  const user = await User.findById(id);
+  if (!user) throw new ApiError(StatusCodes.NOT_FOUND, 'Không tìm thấy tài khoản');
+
+  return generateToken.accessToken({
+    userData: {
+      id: user._id,
+      roles: user.roles
+    }
+  });
+};
+
 export const authService = {
   register,
   login,
   sendOTP,
   verifyOTP,
-  logout
+  logout,
+  refreshToken
 };
