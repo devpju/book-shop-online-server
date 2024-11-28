@@ -1,5 +1,4 @@
 import { env } from '~/config/environment';
-import { EXPIRATION_TIME } from '~/utils/constants';
 
 const { StatusCodes } = require('http-status-codes');
 const { authService } = require('~/services');
@@ -31,7 +30,7 @@ const login = async (req, res, next) => {
       httpOnly: true,
       sameSite: 'strict',
       secure: env.NODE_ENV === 'production',
-      maxAge: EXPIRATION_TIME.REFRESH_TOKEN
+      maxAge: 7 * 24 * 60 * 60 * 1000
     });
     sendResponse({
       res,
